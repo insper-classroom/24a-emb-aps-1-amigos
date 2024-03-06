@@ -16,22 +16,20 @@ int LED_PIN_RED = 16; //OK
 int LED_PIN_GREEN = 17; //OK
 int LED_PIN_BLUE = 15;  //OK
 int LED_PIN_YELLOW = 14; //ok
-int leds[4] = {16, 17, 15, 14}; // vermelho(dó), verde(ré), azul(mi), amarelo(fá)
 
 int BUTTON_PIN_RED =    12; //ok
 int BUTTON_PIN_GREEN =  27; //OK
 int BUTTON_PIN_BLUE =   5; //OK
 int BUTTON_PIN_YELLOW =18;  //ok
-int botoes[4] = {12, 27, 5, 18};
 
 int buzzer = 3;
-int tons[4] = {262, 294, 330, 349}; // dó, ré, mi, fá
+
 
 int volatile green = 0;
 int volatile red = 0;
 int volatile blue = 0;
 int volatile yellow = 0;
-int volatile btn = 0;
+
 
 int pontuacao = 0;
 int sequencia[100];
@@ -40,7 +38,7 @@ bool game_over = false;
 
 //******************* CALLBACKS ******************* 
 void btn_callback(uint gpio, uint32_t events) {
-    btn = 1;
+
     if (gpio == BUTTON_PIN_RED) {
         red = 1;
     }
@@ -188,6 +186,10 @@ int main() {
         // para iniciar um novo jogo
         if (game_over){
             rodada = 0;
+            red = 0;
+            green = 0;
+            blue = 0;
+            yellow = 0;
             game_over = false;
             sleep_ms(500);
             inicio();
