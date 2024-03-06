@@ -35,10 +35,7 @@ int volatile btn = 0;
 
 int pontuacao = 0;
 int sequencia[100];
-int sequencia_jogador[100];
 int rodada = 0;
-int passo = 0;
-int botao_pressionado = 0;
 bool game_over = false;
 
 //******************* CALLBACKS ******************* 
@@ -129,7 +126,7 @@ void aguardarJogador(){
         } else {
             //criar efeito luminoso e sonoro para indicar erro
             buzzer_led(LED_PIN_RED);
-            buzzer_led(LED_PIN_RED);
+            buzzer_led(LED_PIN_BLUE);
             buzzer_led(LED_PIN_RED);
             game_over = true;
             break;
@@ -188,16 +185,16 @@ int main() {
     inicio();
 
     while (true) {
+        // para iniciar um novo jogo
+        if (game_over){
+            rodada = 0;
+            game_over = false;
+            sleep_ms(500);
+            inicio();
+        }
+
         proximaRodada();
         reproduzirSequencia();
         aguardarJogador();
-
-        // para iniciar um novo jogo
-        if (game_over){
-            break;
-            rodada = 0;
-            //passo = 0;
-            game_over = false;
-        }
     }
 }
