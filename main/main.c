@@ -7,24 +7,39 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
+#include <time.h>
+
+//****************** VARIAVEIS GLOBAIS ******************
 
 int LED_PIN_RED = 16; //OK
 int LED_PIN_GREEN = 17; //OK
 int LED_PIN_BLUE = 15;  //OK
 int LED_PIN_YELLOW = 14; //ok
+int leds[4] = {16, 17, 15, 14}; // vermelho(dó), verde(ré), azul(mi), amarelo(fá)
 
 int BUTTON_PIN_RED =    12; //ok
 int BUTTON_PIN_GREEN =  27; //OK
 int BUTTON_PIN_BLUE =   5; //OK
 int BUTTON_PIN_YELLOW =18;  //ok
+int botoes[4] = {12, 27, 5, 18};
 
 int buzzer = 3;
+int tons[4] = {262, 294, 330, 349}; // dó, ré, mi, fá
 
 int volatile green = 0;
 int volatile red = 0;
 int volatile blue = 0;
 int volatile yellow = 0;
 
+int pontuacao = 0;
+int sequencia[100];
+int sequencia_jogador[100];
+int rodada = 0;
+int passo = 0;
+int botao_pressionado = 0;
+bool game_over = false;
+
+//******************* CALLBACKS ******************* 
 void btn_callback(uint gpio, uint32_t events) {
     if (gpio == BUTTON_PIN_RED) {
         red = 1;
@@ -40,6 +55,7 @@ void btn_callback(uint gpio, uint32_t events) {
     }
 }
 
+//************* FUNCOES ****************
 void barulho(int freq, int tempo, int pino){
     int periodo = 1000000/freq;
     for(int i = 0; i < tempo*1000/periodo; i++){
@@ -49,6 +65,54 @@ void barulho(int freq, int tempo, int pino){
         sleep_us(periodo/2);
     }
 }
+
+void proximaRodada(){
+    int sorteio = rand() % 4;
+    sequencia[rodada] = sorteio;
+    rodada++;
+}
+
+void reproduzirSequencia(){
+    for(int i = 0; i < rodada; i++){
+        barulho(tons[sequencia[i]], 500, buzzer);
+        gpio_put(leds[sequencia[i]], 1);
+        sleep_ms(500);
+        gpio_put(leds[sequencia[i]], 0);
+        sleep_ms(500);
+    }
+}
+
+void aguardarJogador(){
+    for (int i = 0; i < rodada; i++){
+        botao_pressionado = 0;
+        bool jogada_efetuada = false;
+        while (!jogada_efetuada){
+            for (int j = 0; j < 4; j++){
+                if (gpio_get(botoes[j]) == 0){
+                    botao_pressionado = j;
+                    barulho(tons[j], 500, buzzer);
+                    jogada_efetuada = true;
+                }
+            }
+    }
+    
+    if (sequencia[passo] != botao_pressionado){
+        //criar efeito luminoso e sonoro para indicar erro
+        for (int i = 0; i < 3; i++){
+            gpio_put(leds[sequencia[passo]], 1);
+            barulho(262, 500, buzzer);
+            sleep_ms(500);
+            gpio_put(leds[sequencia[passo]], 0);
+            sleep_ms(500);
+        }
+        game_over = true;
+        break;
+        }
+        passo++;
+}
+    passo = 0;
+}
+    
 
 
 int main() {
@@ -95,42 +159,21 @@ int main() {
     gpio_set_dir(buzzer, GPIO_OUT);
 
 
-    
+
 
     while (true) {
 
-    //ligar os leds para teste
-    // gpio_put(LED_PIN_RED, !gpio_get(LED_PIN_RED));
-    // gpio_put(LED_PIN_GREEN, !gpio_get(LED_PIN_GREEN));
-    // gpio_put(LED_PIN_BLUE, !gpio_get(LED_PIN_BLUE));
-     
+    
 
-        if (red) {
-            gpio_put(LED_PIN_RED, !gpio_get(LED_PIN_RED));
-            barulho(440, 1500, buzzer);
-            red = 0;
-        }
-        if (green) {
-            gpio_put(LED_PIN_GREEN, !gpio_get(LED_PIN_GREEN));
-            sleep_ms(1000);
-            gpio_put(LED_PIN_GREEN, 0);
-            barulho(440, 1500, buzzer);
-            green = 0;
-        }
-        if (blue) {
-            gpio_put(LED_PIN_BLUE, !gpio_get(LED_PIN_BLUE));
-            sleep_ms(1000);
-            gpio_put(LED_PIN_BLUE, 0);
-            barulho(440, 1500, buzzer);
-            blue = 0;
-        }
-        if (yellow) {
-            gpio_put(LED_PIN_YELLOW, !gpio_get(LED_PIN_YELLOW));
-            sleep_ms(1000);
-            gpio_put(LED_PIN_YELLOW, 0);
-            barulho(440, 1500, buzzer);
-            yellow = 0;
-        }
-     }
+    proximaRodada();
+    reproduzirSequencia();
+    aguardarJogador();
+    // para iniciar um novo jogo
+    if (game_over){
+        rodada = 0;
+        passo = 0;
+        game_over = false;
+    }
 
+}
 }
