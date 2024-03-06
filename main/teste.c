@@ -80,7 +80,8 @@ void buzzer_led(int led_pin) {
     } else {
         freq = 700;
     }
-
+    
+    sleep_ms(100);
     gpio_put(led_pin, !gpio_get(led_pin));
     barulho(freq, 700, buzzer);
     gpio_put(led_pin, !gpio_get(led_pin));
@@ -102,30 +103,19 @@ void proximaRodada() {
 }
 
 void reproduzirSequencia() {
-    for (int i=0; i < rodada; i++) {
+    for (int i; i < rodada; i++) {
         buzzer_led(sequencia[i]);
-        sleep_ms(100);
     }
 }
 
 void aguardarJogador(){
     for (int i=0; i<rodada; i++) {
-        while ((red == 0) && (green == 0) && (blue ==0) && (yellow == 0)) {
-            sleep_ms(10);
+        while (!btn) {
         }
 
-        if ((red && sequencia[i]==LED_PIN_RED) || 
-            (green && sequencia[i]==LED_PIN_GREEN) || 
-            (blue && sequencia[i]==LED_PIN_BLUE) || 
-            (yellow && sequencia[i]==LED_PIN_YELLOW)) {
+        if ((red && sequencia[i]==LED_PIN_RED) || (green && sequencia[i]==LED_PIN_GREEN) || (blue && sequencia[i]==LED_PIN_BLUE) || (yellow && sequencia[i]==LED_PIN_YELLOW)) {
             //acertou
             buzzer_led(sequencia[i]);
-
-            red = 0;
-            blue = 0;
-            green = 0;
-            yellow = 0;
-
         } else {
             //criar efeito luminoso e sonoro para indicar erro
             buzzer_led(LED_PIN_RED);
@@ -134,16 +124,12 @@ void aguardarJogador(){
             game_over = true;
             break;
         }
+        btn = 0;
     }
-
-    sleep_ms(300);
 }
     
 int main() {
     stdio_init_all();
-
-    srand(time(NULL)); 
-
     //init dos leds
     gpio_init(LED_PIN_RED);
     gpio_init(LED_PIN_GREEN);
@@ -194,7 +180,6 @@ int main() {
 
         // para iniciar um novo jogo
         if (game_over){
-            break;
             rodada = 0;
             //passo = 0;
             game_over = false;

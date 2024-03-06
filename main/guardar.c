@@ -5,7 +5,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include <time.h>
@@ -31,7 +30,6 @@ int volatile green = 0;
 int volatile red = 0;
 int volatile blue = 0;
 int volatile yellow = 0;
-int volatile btn = 0;
 
 int pontuacao = 0;
 int sequencia[100];
@@ -43,7 +41,6 @@ bool game_over = false;
 
 //******************* CALLBACKS ******************* 
 void btn_callback(uint gpio, uint32_t events) {
-    btn = 1;
     if (gpio == BUTTON_PIN_RED) {
         red = 1;
     }
@@ -69,81 +66,57 @@ void barulho(int freq, int tempo, int pino){
     }
 }
 
-void buzzer_led(int led_pin) {
-    int freq;
-    if (led_pin == LED_PIN_RED) {
-        freq = 400;
-    } else if (led_pin == LED_PIN_GREEN) {
-        freq = 500;
-    } else if (led_pin == LED_PIN_YELLOW) {
-        freq = 600;
-    } else {
-        freq = 700;
-    }
-
-    gpio_put(led_pin, !gpio_get(led_pin));
-    barulho(freq, 700, buzzer);
-    gpio_put(led_pin, !gpio_get(led_pin));
-}
-
-void inicio() {
-    buzzer_led(LED_PIN_RED);
-    buzzer_led(LED_PIN_GREEN);
-    buzzer_led(LED_PIN_YELLOW);
-    buzzer_led(LED_PIN_BLUE);
-    sleep_ms(500);
-}
-
-void proximaRodada() {
-    int cores[4] = {LED_PIN_BLUE, LED_PIN_GREEN, LED_PIN_RED, LED_PIN_YELLOW}; 
+void proximaRodada(){
     int sorteio = rand() % 4;
-    sequencia[rodada] = cores[sorteio];
+    sequencia[rodada] = sorteio;
     rodada++;
 }
 
-void reproduzirSequencia() {
-    for (int i=0; i < rodada; i++) {
-        buzzer_led(sequencia[i]);
-        sleep_ms(100);
+void reproduzirSequencia(){
+    for(int i = 0; i < rodada; i++){
+        barulho(tons[sequencia[i]], 500, buzzer);
+        gpio_put(leds[sequencia[i]], 1);
+        sleep_ms(500);
+        gpio_put(leds[sequencia[i]], 0);
+        sleep_ms(500);
     }
 }
 
 void aguardarJogador(){
-    for (int i=0; i<rodada; i++) {
-        while ((red == 0) && (green == 0) && (blue ==0) && (yellow == 0)) {
-            sleep_ms(10);
-        }
-
-        if ((red && sequencia[i]==LED_PIN_RED) || 
-            (green && sequencia[i]==LED_PIN_GREEN) || 
-            (blue && sequencia[i]==LED_PIN_BLUE) || 
-            (yellow && sequencia[i]==LED_PIN_YELLOW)) {
-            //acertou
-            buzzer_led(sequencia[i]);
-
-            red = 0;
-            blue = 0;
-            green = 0;
-            yellow = 0;
-
-        } else {
-            //criar efeito luminoso e sonoro para indicar erro
-            buzzer_led(LED_PIN_RED);
-            buzzer_led(LED_PIN_RED);
-            buzzer_led(LED_PIN_RED);
-            game_over = true;
-            break;
-        }
+    for (int i = 0; i < rodada; i++){
+        botao_pressionado = 0;
+        bool jogada_efetuada = false;
+        while (!jogada_efetuada){
+            for (int j = 0; j < 4; j++){
+                if (gpio_get(botoes[j]) == 0){
+                    botao_pressionado = j;
+                    barulho(tons[j], 500, buzzer);
+                    jogada_efetuada = true;
+                }
+            }
     }
-
-    sleep_ms(300);
+    
+    if (sequencia[passo] != botao_pressionado){
+        //criar efeito luminoso e sonoro para indicar erro
+        for (int i = 0; i < 3; i++){
+            gpio_put(leds[sequencia[passo]], 1);
+            barulho(262, 500, buzzer);
+            sleep_ms(500);
+            gpio_put(leds[sequencia[passo]], 0);
+            sleep_ms(500);
+        }
+        game_over = true;
+        break;
+        }
+        passo++;
+}
+    passo = 0;
 }
     
+
+
 int main() {
     stdio_init_all();
-
-    srand(time(NULL)); 
-
     //init dos leds
     gpio_init(LED_PIN_RED);
     gpio_init(LED_PIN_GREEN);
@@ -185,19 +158,22 @@ int main() {
     gpio_init(buzzer);
     gpio_set_dir(buzzer, GPIO_OUT);
 
-    inicio();
+
+
 
     while (true) {
-        proximaRodada();
-        reproduzirSequencia();
-        aguardarJogador();
 
-        // para iniciar um novo jogo
-        if (game_over){
-            break;
-            rodada = 0;
-            //passo = 0;
-            game_over = false;
-        }
+    
+
+    proximaRodada();
+    reproduzirSequencia();
+    aguardarJogador();
+    // para iniciar um novo jogo
+    if (game_over){
+        rodada = 0;
+        passo = 0;
+        game_over = false;
     }
+
+}
 }

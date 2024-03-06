@@ -24,13 +24,16 @@ int volatile green = 0;
 int volatile red = 0;
 int volatile blue = 0;
 int volatile yellow = 0;
+int volatile btn = 0;
 
 int volatile inicio = 1;
-int volatile sequencia = 0;
+int volatile seq = 0;
 int volatile rodada = 5;
 int volatile player = 0;
+int sequencia[100];
 
 void btn_callback(uint gpio, uint32_t events) {
+    btn = 1;
     if (gpio == BUTTON_PIN_RED) {
         red = 1;
     }
@@ -135,18 +138,18 @@ int main() {
             sequencia = 1;
         }
 
-        while (sequencia) {
+        while (seq) {
             int cores[4] = {LED_PIN_BLUE, LED_PIN_GREEN, LED_PIN_RED, LED_PIN_YELLOW}; 
 
             for (int i; i <= rodada; i++) {
                 int indice = rand() % 4;
-                int cor = cores[indice];
-                buzzer_led(cor);
+                sequencia[i] = cores[indice];
+                buzzer_led(cores[indice]);
             }
             
             rodada += 1;
-            sequencia = 0;
-            player = 1;
+            // sequencia = 0;
+            // player = 1;
         }
 
         while (player) {
@@ -183,4 +186,33 @@ int main() {
         //aperta botao, acende luz faz som
      }
 
+}
+
+
+// vermelho = 0
+// verde = 1
+// azul = 2
+// amarelo = 3
+
+void aguardarJogador(){
+    for (int i=0; i<rodada; i++) {
+        if (btn) {
+            if ((red && sequencia[i]==0) || (green && sequencia[i]==1) || (blue && sequencia[i]==2) || (yellow && sequencia[i]==3)) {
+                //acertou
+                buzzer_led(leds[sequencia[i]]);
+            } else {
+                //criar efeito luminoso e sonoro para indicar erro
+                for (int c = 0; c < 3; c++){
+                    gpio_put(leds[sequencia[passo]], 1);
+                    barulho(262, 500, buzzer);
+                    sleep_ms(500);
+                    gpio_put(leds[sequencia[passo]], 0);
+                    sleep_ms(500);
+                }
+                game_over = true;
+                break;
+            }
+            btn = 0;
+        }
+    }
 }
