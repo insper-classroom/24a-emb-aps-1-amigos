@@ -85,8 +85,8 @@ void tocar_musica_tema(int time_ms) {
     for (int i = 0; i < num_notas; i++) {
         if ((time_us_64() - start_time) / 1000 >= time_ms) {
             break; } // Parar se já tiver passado o tempo especificado
-        for (int i = 0; i < num_notas ; i++) {
-            barulho(notas[i], duracoes[i], buzzer); 
+        for (int j = 0; i < num_notas ; j++) {
+            barulho(notas[j], duracoes[j], buzzer); 
             sleep_ms(100);
         }
         // Mantém o buzzer ligado pelo tempo da nota
@@ -124,7 +124,7 @@ void buzzer_led(int led_pin) {
 
 
 void proximaRodada(int rodada, int sequencia[]) {
-    int cores[4] = {LED_PIN_BLUE, LED_PIN_GREEN, LED_PIN_RED, LED_PIN_YELLOW}; 
+    const cores[4] = {LED_PIN_BLUE, LED_PIN_GREEN, LED_PIN_RED, LED_PIN_YELLOW}; 
     int sorteio = rand() % 4;
     sequencia[rodada] = cores[sorteio];
     rodada++;
@@ -219,7 +219,7 @@ int main() {
     gpio_init(buzzer);
     gpio_set_dir(buzzer, GPIO_OUT);
 
-    int sequencia[100];
+    int sequencia[16];
     int rodada = 0;
     bool game_over = false;
 
@@ -228,7 +228,7 @@ int main() {
     while (1) {
         if (start) {
             // para iniciar um novo jogo
-            if (game_over){
+            if (game_over == true){
                 rodada = 0;
                 red = 0;
                 green = 0;
@@ -250,6 +250,18 @@ int main() {
             gpio_put(LED_PIN_YELLOW, 0);
             // desliga o programa
             
+        }
+        if (rodada == 16){
+            //vitoria
+            tocar_musica_tema(6000);
+            rodada = 0;
+            red = 0;
+            green = 0;
+            blue = 0;
+            yellow = 0;
+            game_over = false;
+            sleep_ms(500);
+            inicio();
         }
             
         }
