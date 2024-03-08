@@ -35,6 +35,7 @@ int volatile start = 0;
 int volatile rodada = 0;
 int volatile sequencia[16];
 int volatile game_over = 0;
+int volatile pontuacao = 0;
 
 
 //******************* CALLBACKS ******************* 
@@ -68,7 +69,7 @@ void barulho(int freq, int tempo, int pino){
     }
 }
 void tocar_musica_tema(int time_ms) {
-    uint64_t start_time = time_us_64();
+    
 
     //fur elise
     // int notas[] = {659, 622, 659, 622, 659, 494, 587, 523, 587, 494, 587, 440, 523, 349, 415, 494, 659, 622, 659, 622, 659, 494, 587, 523, 587, 494, 587, 440, 523, 349, 415, 494, 659, 622, 659, 622, 659, 494, 587, 523, 587, 494, 587, 440, 523, 349, 415, 494, 659, 622, 659, 622, 659, 494, 587, 523, 587, 494, 587, 440, 523, 349, 415, 494};
@@ -84,28 +85,29 @@ void tocar_musica_tema(int time_ms) {
     int num_notas = sizeof(notas) / sizeof(notas[0]);
 
 
-    for (int i = 0; i < num_notas; i++) {
-        if ((time_us_64() - start_time) / 1000 >= time_ms) {
-            break; } // Parar se já tiver passado o tempo especificado
-        for (int j = 0; i < num_notas ; j++) {
+    // for (int i = 0; i < num_notas; i++) {
+    //     if ((time_us_64() - start_time) / 1000 >= time_ms) {
+    //         break; } // Parar se já tiver passado o tempo especificado
+        for (int j = 0; j < num_notas ; j++) {
             barulho(notas[j], duracoes[j], buzzer); 
             sleep_ms(100);
         }
+        sleep_ms(2000);
         // Mantém o buzzer ligado pelo tempo da nota
          // Desliga o buzzer
 
          // Breve pausa entre as notas
          
     }
-}
-
+// }
 
 void inicio() {
-    //tocar_musica_tema(6000); // Toca a música tema de Harry Potter
-    buzzer_led(LED_PIN_BLUE);
-    buzzer_led(LED_PIN_YELLOW);
-    buzzer_led(LED_PIN_GREEN);
-    buzzer_led(LED_PIN_RED);
+    tocar_musica_tema(6000); // Toca a música tema de Harry Potter
+
+    // buzzer_led(LED_PIN_BLUE);
+    // buzzer_led(LED_PIN_YELLOW);
+    // buzzer_led(LED_PIN_GREEN);
+    // buzzer_led(LED_PIN_RED);
 }
 
 
@@ -155,6 +157,7 @@ void aguardarJogador(){
             //acertou
             buzzer_led(sequencia[i]);
 
+            pontuacao  = rodada;
             red = 0;
             blue = 0;
             green = 0;
@@ -224,6 +227,7 @@ int main() {
     gpio_init(buzzer);
     gpio_set_dir(buzzer, GPIO_OUT);
 
+
     inicio();
 
     while (1) {
@@ -235,8 +239,12 @@ int main() {
             // para iniciar um novo jogo
             if (game_over){
                 game_over = 0;
+                for (int i = 0; i < pontuacao ; i++){
+                    buzzer_led(LED_PIN_GREEN);
+                    sleep_ms(100);
+                }
                 start = 0;
-                // sleep_ms(500);
+                
             }
         }
 
@@ -246,24 +254,27 @@ int main() {
             green = 0;
             blue = 0;
             yellow = 0;
-            gpio_put(LED_PIN_RED, 0);
-            gpio_put(LED_PIN_GREEN, 0);
-            gpio_put(LED_PIN_BLUE, 0);
-            gpio_put(LED_PIN_YELLOW, 0);
+            pontuacao = 0;
+            
+            // buzzer_led(LED_PIN_GREEN);
+            // buzzer_led(LED_PIN_BLUE);
+
+    
             // desliga o programa    
         }
 
-        if (rodada == 16){
+        if (rodada == 5){
             //vitoria
-            tocar_musica_tema(6000);
+            tocar_musica_tema(8000);
             rodada = 0;
             red = 0;
             green = 0;
             blue = 0;
             yellow = 0;
             game_over = 0;
+            start = 0;
             sleep_ms(500);
-            inicio();
+        
         }
             
         }
