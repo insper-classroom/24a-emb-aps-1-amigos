@@ -157,7 +157,7 @@ void aguardarJogador(){
             //acertou
             buzzer_led(sequencia[i]);
 
-            pontuacao  = rodada;
+            pontuacao  = rodada ;
             red = 0;
             blue = 0;
             green = 0;
@@ -263,7 +263,7 @@ int main() {
             // desliga o programa    
         }
 
-        if (rodada == 5){
+        if (rodada == 15){
             //vitoria
             tocar_musica_tema(8000);
             rodada = 0;
