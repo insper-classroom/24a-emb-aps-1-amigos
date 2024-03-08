@@ -32,7 +32,9 @@ int volatile blue = 0;
 int volatile yellow = 0;
 int volatile start = 0;
 
-
+int volatile rodada = 0;
+int volatile sequencia[16];
+int volatile game_over = 0;
 
 
 //******************* CALLBACKS ******************* 
@@ -99,8 +101,11 @@ void tocar_musica_tema(int time_ms) {
 
 
 void inicio() {
-    tocar_musica_tema(6000); // Toca a música tema de Harry Potter
-    
+    //tocar_musica_tema(6000); // Toca a música tema de Harry Potter
+    buzzer_led(LED_PIN_BLUE);
+    buzzer_led(LED_PIN_YELLOW);
+    buzzer_led(LED_PIN_GREEN);
+    buzzer_led(LED_PIN_RED);
 }
 
 
@@ -123,21 +128,21 @@ void buzzer_led(int led_pin) {
 }
 
 
-void proximaRodada(int rodada, int sequencia[]) {
+void proximaRodada() {
     const cores[4] = {LED_PIN_BLUE, LED_PIN_GREEN, LED_PIN_RED, LED_PIN_YELLOW}; 
     int sorteio = rand() % 4;
     sequencia[rodada] = cores[sorteio];
     rodada++;
 }
 
-void reproduzirSequencia(int rodada, int sequencia[]) {
+void reproduzirSequencia() {
     for (int i=0; i < rodada; i++) {
         buzzer_led(sequencia[i]);
         sleep_ms(100);
     }
 }
 
-void aguardarJogador(int rodada, int sequencia[], bool game_over){
+void aguardarJogador(){
     for (int i=0; i<rodada; i++) {
         while ((red == 0) && (green == 0) && (blue ==0) && (yellow == 0)) {
             sleep_ms(10);
@@ -158,9 +163,9 @@ void aguardarJogador(int rodada, int sequencia[], bool game_over){
         } else {
             //criar efeito luminoso e sonoro para indicar erro
             buzzer_led(LED_PIN_RED);
-            buzzer_led(LED_PIN_BLUE);
             buzzer_led(LED_PIN_RED);
-            game_over = true;
+            buzzer_led(LED_PIN_RED);
+            game_over = 1;
             break;
         }
     }
@@ -219,38 +224,35 @@ int main() {
     gpio_init(buzzer);
     gpio_set_dir(buzzer, GPIO_OUT);
 
-    int sequencia[16];
-    int rodada = 0;
-    bool game_over = false;
-
     inicio();
 
     while (1) {
         if (start) {
-            // para iniciar um novo jogo
-            if (game_over == true){
-                rodada = 0;
-                red = 0;
-                green = 0;
-                blue = 0;
-                yellow = 0;
-                game_over = false;
-                sleep_ms(500);
-                inicio();
-            }
+            proximaRodada();
+            reproduzirSequencia();
+            aguardarJogador();
 
-            proximaRodada(rodada, sequencia);
-            reproduzirSequencia(rodada, sequencia);
-            aguardarJogador(rodada, sequencia, game_over);
+            // para iniciar um novo jogo
+            if (game_over){
+                game_over = 0;
+                start = 0;
+                // sleep_ms(500);
+            }
         }
+
         if (start == 0){
+            rodada = 0;
+            red = 0;
+            green = 0;
+            blue = 0;
+            yellow = 0;
             gpio_put(LED_PIN_RED, 0);
             gpio_put(LED_PIN_GREEN, 0);
             gpio_put(LED_PIN_BLUE, 0);
             gpio_put(LED_PIN_YELLOW, 0);
-            // desliga o programa
-            
+            // desliga o programa    
         }
+
         if (rodada == 16){
             //vitoria
             tocar_musica_tema(6000);
@@ -259,7 +261,7 @@ int main() {
             green = 0;
             blue = 0;
             yellow = 0;
-            game_over = false;
+            game_over = 0;
             sleep_ms(500);
             inicio();
         }
