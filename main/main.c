@@ -22,7 +22,7 @@ int BUTTON_PIN_RED =    12; //ok
 int BUTTON_PIN_GREEN =  27; //OK
 int BUTTON_PIN_BLUE =   5; //OK
 int BUTTON_PIN_YELLOW =18;  //ok
-int BUTTTON_PIN_START = 19;
+int BUTTON_PIN_START = 19;
 
 int buzzer = 3;
 
@@ -31,17 +31,36 @@ int volatile green = 0;
 int volatile red = 0;
 int volatile blue = 0;
 int volatile yellow = 0;
-int volatile start = 1;
+int volatile start = 0;
 
 int volatile rodada = 0;
 int volatile sequencia[16];
 int volatile game_over = 0;
 int volatile pontuacao = 0;
+
+//********************* CALLBACKS *********************
+void btn_callback(uint gpio, uint32_t events) {
+    if (gpio == BUTTON_PIN_START) {
+        start = 1;
+    }
+
+    if (gpio == BUTTON_PIN_RED) {
+        red = 1;
+    }
+    if (gpio == BUTTON_PIN_GREEN) {
+        green = 1;
+    }
+    if (gpio == BUTTON_PIN_BLUE) {
+        blue = 1;
+    }
+    if (gpio == BUTTON_PIN_YELLOW) {
+        yellow = 1;
+    }
+}
     
 int main() {
     stdio_init_all();
 
-    srand(time(NULL)); 
 
     //init dos leds
     gpio_init(LED_PIN_RED);
@@ -62,9 +81,9 @@ int main() {
     gpio_set_dir(LED_PIN_YELLOW, GPIO_OUT);
 
     //botao start
-    gpio_set_dir(BUTTTON_PIN_START, GPIO_IN);
-    gpio_pull_up(BUTTTON_PIN_START);
-    gpio_set_irq_enabled_with_callback(BUTTTON_PIN_START, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &btn_callback);
+    gpio_set_dir(BUTTON_PIN_START, GPIO_IN);
+    gpio_pull_up(BUTTON_PIN_START);
+    gpio_set_irq_enabled_with_callback(BUTTON_PIN_START, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &btn_callback);
 
     //botao red
     gpio_set_dir(BUTTON_PIN_RED, GPIO_IN);

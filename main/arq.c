@@ -5,24 +5,7 @@
 #include <time.h>
 #include "arq.h"
 
-void btn_callback(uint gpio, uint32_t events) {
-    if (gpio == BUTTTON_PIN_START) {
-        start = 1;
-    }
 
-    if (gpio == BUTTON_PIN_RED) {
-        red = 1;
-    }
-    if (gpio == BUTTON_PIN_GREEN) {
-        green = 1;
-    }
-    if (gpio == BUTTON_PIN_BLUE) {
-        blue = 1;
-    }
-    if (gpio == BUTTON_PIN_YELLOW) {
-        yellow = 1;
-    }
-}
 
 //************* FUNCOES ****************
 void barulho(int freq, int tempo, int pino){
@@ -68,11 +51,8 @@ void tocar_musica_tema(int time_ms) {
 
 
 void inicio() {
-    //tocar_musica_tema(6000); // Toca a música tema de Harry Potter
-    buzzer_led(LED_PIN_BLUE);
-    buzzer_led(LED_PIN_YELLOW);
-    buzzer_led(LED_PIN_GREEN);
-    buzzer_led(LED_PIN_RED);
+    tocar_musica_tema(6000); // Toca a música tema de Harry Potter
+    printf("Iniciando o jogo...\n");
 }
 
 
@@ -100,6 +80,7 @@ void proximaRodada() {
     int sorteio = rand() % 4;
     sequencia[rodada] = cores[sorteio];
     rodada++;
+    printf("Rodada: %d\n", rodada);
 }
 
 void reproduzirSequencia() {
