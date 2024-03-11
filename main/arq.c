@@ -17,8 +17,8 @@ void barulho(int freq, int tempo, int pino){
         sleep_us(periodo/2);
     }
 }
-void tocar_musica_tema(int time_ms) {
-    uint64_t start_time = time_us_64();
+void tocar_musica_tema() {
+  
 
     //fur elise
     // int notas[] = {659, 622, 659, 622, 659, 494, 587, 523, 587, 494, 587, 440, 523, 349, 415, 494, 659, 622, 659, 622, 659, 494, 587, 523, 587, 494, 587, 440, 523, 349, 415, 494, 659, 622, 659, 622, 659, 494, 587, 523, 587, 494, 587, 440, 523, 349, 415, 494, 659, 622, 659, 622, 659, 494, 587, 523, 587, 494, 587, 440, 523, 349, 415, 494};
@@ -33,11 +33,8 @@ void tocar_musica_tema(int time_ms) {
     // int duracoes[] = {300,300,300,300,300,300,600,300,300,300,300,300,600,300,300,300,300,300,300,300,300,300,300,300,300,300,600,300,300,600};
     int num_notas = sizeof(notas) / sizeof(notas[0]);
 
-
-    for (int i = 0; i < num_notas; i++) {
-        if ((time_us_64() - start_time) / 1000 >= time_ms) {
-            break; } // Parar se já tiver passado o tempo especificado
-        for (int j = 0; i < num_notas ; j++) {
+// Parar se já tiver passado o tempo especificado
+        for (int j = 0; j < num_notas ; j++) {
             barulho(notas[j], duracoes[j], buzzer); 
             sleep_ms(100);
         }
@@ -47,11 +44,11 @@ void tocar_musica_tema(int time_ms) {
          // Breve pausa entre as notas
          
     }
-}
+
 
 
 void inicio() {
-    tocar_musica_tema(6000); // Toca a música tema de Harry Potter
+    tocar_musica_tema(); // Toca a música tema de Harry Potter
     printf("Iniciando o jogo...\n");
 }
 

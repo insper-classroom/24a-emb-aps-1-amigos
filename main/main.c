@@ -36,7 +36,7 @@ int volatile start = 0;
 int volatile rodada = 0;
 int volatile sequencia[16];
 int volatile game_over = 0;
-int volatile pontuacao = 0;
+
 
 //********************* CALLBACKS *********************
 void btn_callback(uint gpio, uint32_t events) {
@@ -108,10 +108,13 @@ int main() {
     gpio_init(buzzer);
     gpio_set_dir(buzzer, GPIO_OUT);
 
+    //iniciar tempo 
+    srand(time(NULL));
 
     inicio();
 
     while (1) {
+        printf("entrou no while: %d\n", start);
         if (start) {
             proximaRodada();
             reproduzirSequencia();
@@ -120,7 +123,8 @@ int main() {
             // para iniciar um novo jogo
             if (game_over){
                 game_over = 0;
-                for (int i = 0; i < pontuacao ; i++){
+                // mostra a pontuacao do jogador
+                for (int i = 0; i < rodada - 1 ; i++){
                     buzzer_led(LED_PIN_GREEN);
                     sleep_ms(100);
                 }
@@ -135,7 +139,7 @@ int main() {
             green = 0;
             blue = 0;
             yellow = 0;
-            pontuacao = 0;
+            
             
             // buzzer_led(LED_PIN_GREEN);
             // buzzer_led(LED_PIN_BLUE);
@@ -146,7 +150,7 @@ int main() {
 
         if (rodada == 15){
             //vitoria
-            tocar_musica_tema(8000);
+            tocar_musica_tema();
             rodada = 0;
             red = 0;
             green = 0;

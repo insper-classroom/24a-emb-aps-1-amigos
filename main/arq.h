@@ -32,7 +32,7 @@ extern volatile int game_over;
 
 
 void barulho(int freq, int tempo, int pino);
-void tocar_musica_tema(int time_ms);
+void tocar_musica_tema();
 void inicio();
 void buzzer_led(int led_pin);
 void proximaRodada();
